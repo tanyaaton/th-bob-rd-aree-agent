@@ -109,7 +109,9 @@ instructions: |-
 guidelines: []
 collaborators: []
 tools:
-- tax_submission_api
+- Get_all_tax_submissions_9490VN
+- Submit_a_tax_form_9022IV
+- Validate_a_user_by_national_ID_8549Gw
 toolkits: []
 plugins:
   agent_pre_invoke: []

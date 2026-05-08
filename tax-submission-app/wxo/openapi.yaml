@@ -7,7 +7,7 @@ info:
     tax-submission-app/app.py.
 
 servers:
-  - url: http://localhost:8080
+  - url: https://application-18.29mcwwdwrirt.us-south.codeengine.appdomain.cloud
     description: Local development server
 
 tags:
