@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Tax Form - Tax Submission System{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Submit Tax Form / ยื่นแบบภาษี</h2>
+    
+    <div id="message-area" class="message" style="display: none;"></div>
+    
+    <!-- Step 1: User Validation -->
+    <div id="step1" class="form-step">
+        <h3>Step 1: User Information / ข้อมูลผู้ยื่น</h3>
+        <form id="userForm">
+            <div class="form-group">
+                <label for="name">Name / ชื่อ:</label>
+                <input type="text" id="name" name="name" readonly placeholder="Will be filled from database">
+            </div>
+            
+            <div class="form-group">
+                <label for="national_id">National ID / เลขบัตรประชาชน: <span class="required">*</span></label>
+                <input type="text" id="national_id" name="national_id" required 
+                       placeholder="13-digit National ID" maxlength="13" pattern="[0-9]{13}">
+                <small>Only [1234567890123](tax-submission-app/database.py) is allowed</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="birthday">Birthday / วันเกิด:</label>
+                <input type="date" id="birthday" name="birthday" readonly>
+            </div>
+            
+            <div class="button-group">
+                <a href="/" class="btn btn-secondary">Cancel</a>
+                <button type="button" class="btn btn-primary" onclick="validateUser()">Next →</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Step 2: Income Types -->
+    <div id="step2" class="form-step" style="display: none;">
+        <h3>Step 2: Income Information / ข้อมูลรายได้</h3>
+        <p class="instruction">Select the income types that apply to you and fill in the details:</p>
+        
+        <form id="incomeForm">
+            <!-- Category 1: รายได้จากเงินเดือน -->
+            <div class="income-category">
+                <h4>1. รายได้จากเงินเดือน (Salary Income)</h4>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_1" value="1" onchange="toggleIncomeFields(this)">
+                        <label for="income_1">เงินเดือนหรือเงินได้ตามสัญญาจ้างแรงงาน (มาตรา 40(1))</label>
+                    </div>
+                    <div class="income-fields" id="fields_1" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_2" value="2" onchange="toggleIncomeFields(this)">
+                        <label for="income_2">เงินได้ที่นายจ้างจ่ายให้ครั้งเดียวเพราะเหตุออกจากงาน (กรณีไม่นำไปรวมคำนวณภาษี) (มาตรา 40(1))</label>
+                    </div>
+                    <div class="income-fields" id="fields_2" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Category 2: รายได้จากฟรีแลนซ์ -->
+            <div class="income-category">
+                <h4>2. รายได้จากฟรีแลนซ์, รับจ้างทั่วไป (Freelance Income)</h4>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_3" value="3" onchange="toggleIncomeFields(this)">
+                        <label for="income_3">เงินได้จากการรับจ้าง ฟรีแลนซ์ ค่าตำแหน่ง เบี้ยประชุม หรือค่านายหน้า (มาตรา 40(2))</label>
+                    </div>
+                    <div class="income-fields" id="fields_3" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Category 3: รายได้จากทรัพย์สิน -->
+            <div class="income-category">
+                <h4>3. รายได้จากทรัพย์สิน, การทำธุรกิจ, อาชีพอิสระ (Property/Business Income)</h4>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_4" value="4" onchange="toggleIncomeFields(this)">
+                        <label for="income_4">ค่าลิขสิทธิ์ ค่าสิทธิ์ในทรัพย์สินทางปัญญา (Royalty) และ ค่ากู๊ดวิลล์ (Goodwill) หรือ เงินได้รายปีที่ได้มาจากนิติกรรม และคำพิพากษาของศาล (มาตรา 40(3))</label>
+                    </div>
+                    <div class="income-fields" id="fields_4" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_5" value="5" onchange="toggleIncomeFields(this)">
+                        <label for="income_5">ค่าเช่า ค่าผิดสัญญาเช่าซื้อหรือซื้อขายเงินผ่อน (มาตรา 40(5))</label>
+                    </div>
+                    <div class="income-fields" id="fields_5" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_6" value="6" onchange="toggleIncomeFields(this)">
+                        <label for="income_6">ค่าตอบแทนจากการประกอบวิชาชีพอิสระ วิชากฎหมาย การประกอบโรคศิลปะ วิศวกรรม สถาปัตยกรรม การบัญชี ประณีตศิลปกรรม (มาตรา 40(6))</label>
+                    </div>
+                    <div class="income-fields" id="fields_6" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_7" value="7" onchange="toggleIncomeFields(this)">
+                        <label for="income_7">เงินได้จากการรับเหมาที่ผู้รับเหมาทั้งค่าแรงและค่าของ ที่ต้องลงทุนด้วยการจัดหาสัมภาระ ในส่วนสำคัญ นอกจากเครื่องมือ (มาตรา 40(7))</label>
+                    </div>
+                    <div class="income-fields" id="fields_7" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_8" value="8" onchange="toggleIncomeFields(this)">
+                        <label for="income_8">เงินได้จากธุรกิจ การพาณิชย์ การเกษตร การอุตสาหกรรม การขนส่ง และเงินได้อื่นๆ (มาตรา 40(8))</label>
+                    </div>
+                    <div class="income-fields" id="fields_8" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_9" value="9" onchange="toggleIncomeFields(this)">
+                        <label for="income_9">เงินได้จากการขายอสังหาริมทรัพย์ฯ (มาตรา 40(8))</label>
+                    </div>
+                    <div class="income-fields" id="fields_9" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Category 4: รายได้จากการลงทุน -->
+            <div class="income-category">
+                <h4>4. รายได้จากการลงทุน (Investment Income)</h4>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_10" value="10" onchange="toggleIncomeFields(this)">
+                        <label for="income_10">ดอกเบี้ย เงินเทียบเท่าเงินปันผล เงินปันผลจากบริษัทต่างประเทศ ประโยชน์ใดๆ จากคริปโทเคอร์เรนซีหรือโทเคนดิจิทัล เงินเพิ่มทุน เงินลดทุน (มาตรา 40(4))</label>
+                    </div>
+                    <div class="income-fields" id="fields_10" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_11" value="11" onchange="toggleIncomeFields(this)">
+                        <label for="income_11">เงินปันผล ส่วนแบ่งกำไรจากหุ้น/กองทุน (มาตรา 40(4)(ข))</label>
+                    </div>
+                    <div class="income-fields" id="fields_11" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_12" value="12" onchange="toggleIncomeFields(this)">
+                        <label for="income_12">กำไรจากการขายกองทุนรวมเพื่อการเลี้ยงชีพ (RMF)</label>
+                    </div>
+                    <div class="income-fields" id="fields_12" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_13" value="13" onchange="toggleIncomeFields(this)">
+                        <label for="income_13">กำไรจากการขายกองทุนรวมหุ้นระยะยาว (LTF)</label>
+                    </div>
+                    <div class="income-fields" id="fields_13" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_14" value="14" onchange="toggleIncomeFields(this)">
+                        <label for="income_14">กำไรจากการขายกองทุนเพื่อการออม (SSF)</label>
+                    </div>
+                    <div class="income-fields" id="fields_14" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_15" value="15" onchange="toggleIncomeFields(this)">
+                        <label for="income_15">กำไรจากการขายหน่วยลงทุนในกองทุนรวมไทยเพื่อความยั่งยืน (Thai ESG)/แบบพิเศษ (Thai ESGX)</label>
+                    </div>
+                    <div class="income-fields" id="fields_15" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_16" value="16" onchange="toggleIncomeFields(this)">
+                        <label for="income_16">เงินได้พึงประเมินที่ได้ใช้สิทธิเลือกเสียภาษีโดยไม่ต้องนำมารวมคำนวณภาษีกับเงินได้อื่น</label>
+                    </div>
+                    <div class="income-fields" id="fields_16" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Category 5: รายได้จากมรดก -->
+            <div class="income-category">
+                <h4>5. รายได้จากมรดกหรือได้รับมา (Inheritance/Gifts)</h4>
+                
+                <div class="income-item">
+                    <div class="income-checkbox">
+                        <input type="checkbox" id="income_17" value="17" onchange="toggleIncomeFields(this)">
+                        <label for="income_17">เงินได้จากการให้หรือการรับ (มาตรา 40(8))</label>
+                    </div>
+                    <div class="income-fields" id="fields_17" style="display: none;">
+                        <input type="number" placeholder="Amount (฿)" min="0" step="0.01">
+                        <input type="text" placeholder="Details (optional)">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button type="button" class="btn btn-secondary" onclick="showStep(1)">← Back</button>
+                <button type="button" class="btn btn-primary" onclick="submitTaxForm()">Submit Form</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/submit.js') }}"></script>
+{% endblock %}

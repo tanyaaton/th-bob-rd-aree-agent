@@ -1,0 +1,404 @@
+openapi: 3.0.3
+info:
+  title: Tax Submission API
+  version: 1.0.0
+  description: >
+    OpenAPI specification for the tax submission application defined in
+    tax-submission-app/app.py.
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: User Validation
+  - name: Tax Submission
+  - name: Submission History
+
+paths:
+  /api/validate-user:
+    post:
+      tags:
+        - User Validation
+      summary: Validate a user by national ID
+      operationId: validateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateUserRequest'
+            examples:
+              validUser:
+                summary: Valid user request
+                value:
+                  national_id: "1234567890123"
+              invalidUser:
+                summary: Invalid user request
+                value:
+                  national_id: "9999999999999"
+      responses:
+        '200':
+          description: User validated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateUserSuccessResponse'
+              examples:
+                success:
+                  value:
+                    valid: true
+                    message: User validated successfully
+                    user:
+                      name: John Doe
+                      birthday: "1990-01-01"
+        '400':
+          description: Missing national ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateUserErrorResponse'
+              examples:
+                missingNationalId:
+                  value:
+                    valid: false
+                    message: National ID is required
+        '401':
+          description: Invalid or unauthorized national ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateUserErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    valid: false
+                    message: Only National ID 1234567890123 is allowed
+                notFound:
+                  value:
+                    valid: false
+                    message: User not found
+
+  /api/submit-tax:
+    post:
+      tags:
+        - Tax Submission
+      summary: Submit a tax form
+      operationId: submitTax
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitTaxRequest'
+            examples:
+              singleIncomeType:
+                summary: Submit with one income type
+                value:
+                  name: John Doe
+                  national_id: "1234567890123"
+                  income_data:
+                    - type: 1
+                      amount: 50000
+                      details: Monthly salary
+              multipleIncomeTypes:
+                summary: Submit with multiple income types
+                value:
+                  name: John Doe
+                  national_id: "1234567890123"
+                  income_data:
+                    - type: 1
+                      amount: 50000
+                      details: Monthly salary
+                    - type: 3
+                      amount: 15000
+                      details: Freelance work
+                    - type: 10
+                      amount: 12000
+                      details: Investment income
+      responses:
+        '200':
+          description: Tax form submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitTaxSuccessResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    submission_id: 1
+                    message: Tax form submitted successfully
+        '400':
+          description: Validation error in request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitTaxErrorResponse'
+              examples:
+                missingNationalId:
+                  value:
+                    success: false
+                    message: National ID is required
+                noIncomeTypes:
+                  value:
+                    success: false
+                    message: At least one income type must be selected
+                missingType:
+                  value:
+                    success: false
+                    message: Income item #1 is missing type
+                invalidType:
+                  value:
+                    success: false
+                    message: Income item #1 type must be a number from 1 to 17
+        '401':
+          description: Invalid or unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitTaxErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    success: false
+                    message: Only National ID 1234567890123 is allowed
+                invalidCredentials:
+                  value:
+                    success: false
+                    message: Invalid user credentials
+        '500':
+          description: Submission failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitTaxErrorResponse'
+              examples:
+                failure:
+                  value:
+                    success: false
+                    message: Failed to submit tax form
+
+  /api/history:
+    get:
+      tags:
+        - Submission History
+      summary: Get all tax submissions
+      operationId: getSubmissionHistory
+      responses:
+        '200':
+          description: List of tax submissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryResponse'
+              examples:
+                success:
+                  value:
+                    submissions:
+                      - id: 1
+                        name: John Doe
+                        national_id: "1234567890123"
+                        income_data:
+                          - type: 1
+                            amount: 50000
+                            details: Monthly salary
+                        submitted_at: "2026-05-08T12:00:00"
+        '500':
+          description: Failed to retrieve submission history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryErrorResponse'
+              examples:
+                error:
+                  value:
+                    error: Internal server error
+
+components:
+  schemas:
+    ValidateUserRequest:
+      type: object
+      required:
+        - national_id
+      properties:
+        national_id:
+          type: string
+          description: 13-digit Thai national ID
+          example: "1234567890123"
+
+    UserProfile:
+      type: object
+      required:
+        - name
+        - birthday
+      properties:
+        name:
+          type: string
+          example: John Doe
+        birthday:
+          type: string
+          format: date
+          example: "1990-01-01"
+
+    ValidateUserSuccessResponse:
+      type: object
+      required:
+        - valid
+        - message
+        - user
+      properties:
+        valid:
+          type: boolean
+          enum: [true]
+        message:
+          type: string
+          example: User validated successfully
+        user:
+          $ref: '#/components/schemas/UserProfile'
+
+    ValidateUserErrorResponse:
+      type: object
+      required:
+        - valid
+        - message
+      properties:
+        valid:
+          type: boolean
+          enum: [false]
+        message:
+          type: string
+          example: National ID is required
+
+    IncomeItem:
+      type: object
+      required:
+        - type
+        - amount
+      properties:
+        type:
+          type: integer
+          minimum: 1
+          maximum: 17
+          description: |
+            Numeric income type ID corresponding to the list in [`income_type.md`](income_type.md).
+
+            Type mapping:
+            1 = เงินเดือนหรือเงินได้ตามสัญญาจ้างแรงงาน (มาตรา 40(1))
+            2 = เงินได้ที่นายจ้างจ่ายให้ครั้งเดียวเพราะเหตุออกจากงาน (กรณีไม่นำไปรวมคำนวณภาษี) (มาตรา 40(1))
+            3 = เงินได้จากการรับจ้าง ฟรีแลนซ์ ค่าตำแหน่ง เบี้ยประชุม หรือค่านายหน้า (มาตรา 40(2))
+            4 = ค่าลิขสิทธิ์ ค่าสิทธิ์ในทรัพย์สินทางปัญญา (Royalty) และค่ากู๊ดวิลล์ (Goodwill) หรือเงินได้รายปีที่ได้มาจากนิติกรรม และคำพิพากษาของศาล (มาตรา 40(3))
+            5 = ค่าเช่า ค่าผิดสัญญาเช่าซื้อหรือซื้อขายเงินผ่อน (มาตรา 40(5))
+            6 = ค่าตอบแทนจากการประกอบวิชาชีพอิสระ วิชากฎหมาย การประกอบโรคศิลปะ วิศวกรรม สถาปัตยกรรม การบัญชี ประณีตศิลปกรรม (มาตรา 40(6))
+            7 = เงินได้จากการรับเหมาที่ผู้รับเหมาทั้งค่าแรงและค่าของ ที่ต้องลงทุนด้วยการจัดหาสัมภาระ ในส่วนสำคัญ นอกจากเครื่องมือ (มาตรา 40(7))
+            8 = เงินได้จากธุรกิจ การพาณิชย์ การเกษตร การอุตสาหกรรม การขนส่ง และเงินได้อื่นๆ (มาตรา 40(8))
+            9 = เงินได้จากการขายอสังหาริมทรัพย์ฯ (มาตรา 40(8))
+            10 = ดอกเบี้ย เงินเทียบเท่าเงินปันผล เงินปันผลจากบริษัทต่างประเทศ ประโยชน์ใดๆ จากคริปโทเคอร์เรนซีหรือโทเคนดิจิทัล เงินเพิ่มทุน เงินลดทุน (มาตรา 40(4))
+            11 = เงินปันผล ส่วนแบ่งกำไรจากหุ้น/กองทุน (มาตรา 40(4)(ข))
+            12 = กำไรจากการขายกองทุนรวมเพื่อการเลี้ยงชีพ (RMF)
+            13 = กำไรจากการขายกองทุนรวมหุ้นระยะยาว (LTF)
+            14 = กำไรจากการขายกองทุนเพื่อการออม (SSF)
+            15 = กำไรจากการขายหน่วยลงทุนในกองทุนรวมไทยเพื่อความยั่งยืน (Thai ESG)/แบบพิเศษ (Thai ESGX)
+            16 = เงินได้พึงประเมินที่ได้ใช้สิทธิเลือกเสียภาษีโดยไม่ต้องนำมารวมคำนวณภาษีกับเงินได้อื่น
+            17 = เงินได้จากการให้หรือการรับ (มาตรา 40(8))
+          example: 1
+        amount:
+          type: number
+          format: float
+          minimum: 0
+          example: 50000
+        details:
+          type: string
+          description: Optional free-text details about the income item
+          example: Monthly salary
+
+    SubmitTaxRequest:
+      type: object
+      required:
+        - name
+        - national_id
+        - income_data
+      properties:
+        name:
+          type: string
+          example: John Doe
+        national_id:
+          type: string
+          description: 13-digit Thai national ID
+          example: "1234567890123"
+        income_data:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/IncomeItem'
+
+    SubmitTaxSuccessResponse:
+      type: object
+      required:
+        - success
+        - submission_id
+        - message
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        submission_id:
+          type: integer
+          example: 1
+        message:
+          type: string
+          example: Tax form submitted successfully
+
+    SubmitTaxErrorResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        message:
+          type: string
+          example: Failed to submit tax form
+
+    SubmissionRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: John Doe
+        national_id:
+          type: string
+          example: "1234567890123"
+        income_data:
+          type: array
+          items:
+            $ref: '#/components/schemas/IncomeItem'
+        submitted_at:
+          type: string
+          example: "2026-05-08T12:00:00"
+
+    HistoryResponse:
+      type: object
+      required:
+        - submissions
+      properties:
+        submissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionRecord'
+
+    HistoryErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: Internal server error
+
+# Made with Bob

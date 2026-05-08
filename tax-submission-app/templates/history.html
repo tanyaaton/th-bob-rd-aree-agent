@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Submission History - Tax Submission System{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <h2>Submission History / ประวัติการยื่นแบบ</h2>
+    
+    <div class="button-group">
+        <a href="/" class="btn btn-secondary">← Back to Home</a>
+    </div>
+    
+    <div id="loading" class="loading">Loading submissions...</div>
+    <div id="empty-state" class="empty-state" style="display: none;">
+        <p>📋 No tax submissions found.</p>
+        <p>คุณยังไม่มีประวัติการยื่นแบบภาษี</p>
+        <a href="/submit" class="btn btn-primary">Submit Your First Tax Form</a>
+    </div>
+    
+    <div id="submissions-list" class="submissions-list"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}

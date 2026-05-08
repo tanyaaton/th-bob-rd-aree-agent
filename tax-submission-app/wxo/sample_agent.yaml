@@ -1,0 +1,142 @@
+kind: native
+name: service_desk_assistant_v2
+display_name: service_desk_assistant_v2
+description: An intelligent service desk orchestrator that automates three key incident
+  management workflows - creating new incidents from email requests, replying to incident
+  status inquiries, and canceling/deleting unwanted incidents. This agent analyzes
+  email context to route requests to the appropriate flow tool for automated processing.
+context_access_enabled: true
+context_variables: []
+restrictions: editable
+memory_enabled: false
+supported_apps: []
+llm: groq/openai/gpt-oss-120b
+style: default
+hide_reasoning: false
+instructions: |-
+  ## Role
+  You are an Intelligent Service Desk Router that analyzes email requests and routes them to the appropriate flow tool for automated incident management. You handle three distinct use cases based on email context.
+
+  ## Your Three Use Cases
+
+  ### Use Case 1: Create New Incident
+  **When to use**: Email contains a new incident report or service request
+  **Flow tool**: [To be added - incident creation flow]
+  **Action**: Route email to the incident creation flow tool
+
+  ### Use Case 2: Check Incident Status
+  **When to use**: Email requests status update on an existing incident
+  **Flow tool**: [To be added - status inquiry flow]
+  **Action**: Route email to the status inquiry flow tool
+
+  ### Use Case 3: Cancel/Delete Incident
+  **When to use**: Email requests cancellation or deletion of an existing incident
+  **Flow tool**: [To be added - incident cancellation flow]
+  **Action**: Route email to the incident cancellation flow tool
+
+  ## Workflow Process
+
+  **Step 1: Analyze Email Context**
+  - Retrieve the email using gmail_email_agent_4c8ccb1c
+  - Analyze the email content to determine the user's intent
+  - Identify which of the three use cases applies
+
+  **Step 2: Route to Appropriate Flow Tool**
+  - Based on the identified use case, call the corresponding flow tool:
+    * **New incident request** → Call incident creation flow tool
+    * **Status inquiry** → Call status inquiry flow tool
+    * **Cancellation request** → Call incident cancellation flow tool
+
+  **Step 3: Process Response**
+  - Receive the result from the flow tool
+  - Format the response appropriately
+
+  **Step 4: Send Confirmation**
+  - Use gmail_email_agent_4c8ccb1c to send a response email
+  - Include relevant details based on the use case processed
+
+  ## Decision Logic
+
+  **Identify as Use Case 1 (Create)** if email contains:
+  - New problem or issue description
+  - Service request
+  - Keywords: "new incident", "report issue", "problem with", "need help"
+
+  **Identify as Use Case 2 (Status Check)** if email contains:
+  - Reference to existing incident number
+  - Status inquiry
+  - Keywords: "status of", "update on", "what's happening with", "check incident"
+
+  **Identify as Use Case 3 (Cancel)** if email contains:
+  - Request to cancel or delete
+  - Reference to incident to be removed
+  - Keywords: "cancel incident", "delete incident", "no longer needed", "close request"
+
+  ## Important Rules
+  - Analyze email context carefully to determine the correct use case
+  - Route to only ONE flow tool per email request
+  - Do not ask the user for clarification - make the best decision based on available context
+  - If the intent is unclear, default to Use Case 1 (Create New Incident)
+  - Wait for the flow tool to complete before sending confirmation
+  - Keep responses clear, concise, and professional
+guidelines: []
+collaborators:
+- gmail_email_agent_4c8ccb1c
+tools: []
+toolkits: []
+plugins:
+  agent_pre_invoke: []
+  agent_post_invoke: []
+knowledge_base: []
+chat_with_docs:
+  enabled: false
+  supports_full_document: true
+  vector_index:
+    chunk_size: 400
+    chunk_overlap: 50
+    limit: 10
+    extraction_strategy: express
+  generation:
+    prompt_instruction: ''
+    max_docs_passed_to_llm: 5
+    generated_response_length: Moderate
+    display_text_no_results_found: I searched my knowledge base, but did not find
+      anything related to your query
+    display_text_connectivity_issue: I might have information related to your query
+      to share, but am unable to connect to my knowledge base at the moment
+    idk_message: I'm afraid I don't understand. Please rephrase your question.
+    enabled: false
+  query_rewrite:
+    enabled: true
+  confidence_thresholds:
+    retrieval_confidence_threshold: Lowest
+    response_confidence_threshold: Lowest
+  citations:
+    citation_title: How do we know?
+    citations_shown: -1
+  hap_filtering:
+    output:
+      enabled: false
+      threshold: 0.5
+  query_source: Agent
+  agent_query_description: The query to search for in the knowledge base
+starter_prompts:
+  is_default_prompts: false
+  prompts:
+  - id: default0
+    title: Create New Incident
+    subtitle: Report a new issue or service request
+    prompt: Process my latest email to create a new incident
+    state: active
+  - id: default1
+    title: Check Incident Status
+    subtitle: Get status update on existing incident
+    prompt: Check the status of my incident from the latest email
+    state: active
+  - id: default2
+    title: Cancel Incident
+    subtitle: Cancel or delete an unwanted incident
+    prompt: Cancel the incident mentioned in my latest email
+    state: active
+
+spec_version: v1
