@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบยื่นแบบฟอร์มภาษี</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>ระบบยื่นแบบฟอร์มภาษีเงินได้บุคคลธรรมดา</h1>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="card">
+                <h2 class="page-title">ยินดีต้อนรับ</h2>
+                <p class="text-center" style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 40px;">
+                    กรุณาเลือกรายการที่ต้องการ
+                </p>
+                
+                <div class="home-buttons">
+                    <button class="btn btn-primary btn-large" onclick="goToHistory()">
+                        📋 ดูประวัติการยื่นแบบฟอร์ม
+                    </button>
+                    
+                    <button class="btn btn-primary btn-large" onclick="goToSubmit()">
+                        📝 ยื่นแบบฟอร์มภาษี
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>กำลังโหลด...</p>
+    </div>
+
+    <script src="../static/js/app.js"></script>
+</body>
+</html>

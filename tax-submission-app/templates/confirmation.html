@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ยื่นแบบฟอร์มภาษี - ระบบยื่นแบบฟอร์มภาษี</title>
+    <title>ยืนยันการยื่นแบบฟอร์ม - ระบบยื่นแบบฟอร์มภาษี</title>
     <link rel="stylesheet" href="../static/css/styles.css">
 </head>
 <body>
@@ -16,31 +16,31 @@
     <main>
         <div class="container">
             <div class="card">
-                <h2 class="page-title">กรอกข้อมูลรายได้</h2>
+                <h2 class="page-title">ยืนยันข้อมูลก่อนส่ง</h2>
                 <p class="text-center" style="color: var(--text-secondary); margin-bottom: 30px;">
-                    กรุณากรอกจำนวนเงินรายได้ในแต่ละประเภท (กรอกเฉพาะประเภทที่มีรายได้)
+                    กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนยืนยันการส่ง
                 </p>
                 
                 <div class="table-container">
-                    <table class="income-table">
+                    <table class="summary-table">
                         <thead>
                             <tr>
                                 <th>ประเภทรายได้</th>
                                 <th>จำนวนเงิน (บาท)</th>
                             </tr>
                         </thead>
-                        <tbody id="incomeTableBody">
+                        <tbody id="confirmationTableBody">
                             <!-- Will be populated by JavaScript -->
                         </tbody>
                     </table>
                 </div>
 
                 <div class="button-group mt-40">
-                    <button class="btn btn-secondary" onclick="goToHome()">
-                        ← กลับหน้าหลัก
+                    <button class="btn btn-secondary" onclick="goBack()">
+                        ← แก้ไขข้อมูล
                     </button>
-                    <button class="btn btn-primary" onclick="storeAndNavigate()">
-                        ถัดไป →
+                    <button class="btn btn-primary" onclick="confirmSubmit()">
+                        ✓ ยืนยันและส่ง
                     </button>
                 </div>
             </div>
@@ -49,7 +49,7 @@
 
     <div id="loading" class="loading">
         <div class="spinner"></div>
-        <p>กำลังโหลด...</p>
+        <p>กำลังส่งข้อมูล...</p>
     </div>
 
     <script src="../static/js/app.js"></script>

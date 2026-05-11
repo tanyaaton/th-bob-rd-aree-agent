@@ -1,26 +1,62 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประวัติการยื่นแบบฟอร์ม - ระบบยื่นแบบฟอร์มภาษี</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>ระบบยื่นแบบฟอร์มภาษีเงินได้บุคคลธรรมดา</h1>
+        </div>
+    </header>
 
-{% block title %}Submission History - Tax Submission System{% endblock %}
+    <main>
+        <div class="container">
+            <div class="card">
+                <h2 class="page-title">ประวัติการยื่นแบบฟอร์มภาษี</h2>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ลำดับ</th>
+                                <th>ชื่อ-นามสกุล</th>
+                                <th>เลขบัตรประชาชน</th>
+                                <th>จำนวนประเภทรายได้</th>
+                                <th>รายได้รวม</th>
+                                <th>วันที่ยื่น</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    <div class="loading">
+                                        <div class="spinner"></div>
+                                        <p>กำลังโหลดข้อมูล...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-{% block content %}
-<div class="history-container">
-    <h2>Submission History / ประวัติการยื่นแบบ</h2>
-    
-    <div class="button-group">
-        <a href="/" class="btn btn-secondary">← Back to Home</a>
+                <div class="button-group mt-40">
+                    <button class="btn btn-secondary" onclick="goToHome()">
+                        ← กลับหน้าหลัก
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>กำลังโหลด...</p>
     </div>
-    
-    <div id="loading" class="loading">Loading submissions...</div>
-    <div id="empty-state" class="empty-state" style="display: none;">
-        <p>📋 No tax submissions found.</p>
-        <p>คุณยังไม่มีประวัติการยื่นแบบภาษี</p>
-        <a href="/submit" class="btn btn-primary">Submit Your First Tax Form</a>
-    </div>
-    
-    <div id="submissions-list" class="submissions-list"></div>
-</div>
-{% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/history.js') }}"></script>
-{% endblock %}
+    <script src="../static/js/app.js"></script>
+</body>
+</html>
