@@ -39,6 +39,32 @@
         <p>กำลังโหลด...</p>
     </div>
 
+    <!-- WatsonX Agent Chat Widget Container -->
+    <div id="root"></div>
+
     <script src="../static/js/app.js"></script>
+    
+    <!-- WatsonX Orchestrate Agent Embed Script -->
+    <script>
+      window.wxOConfiguration = {
+        orchestrationID: "baf3554ebf3c4225ac4c4e9efb79516b_240d6b03-bd82-43d9-8d0e-fae8ee2659e5",
+        hostURL: "https://us-south.watson-orchestrate.cloud.ibm.com",
+        rootElementID: "root",
+        deploymentPlatform: "ibmcloud",
+        crn: "crn:v1:bluemix:public:watsonx-orchestrate:us-south:a/baf3554ebf3c4225ac4c4e9efb79516b:240d6b03-bd82-43d9-8d0e-fae8ee2659e5::",
+        chatOptions: {
+          agentId: "f3ba7f22-e1a0-486b-bde6-fec8061751e3"
+        }
+      };
+
+      setTimeout(function () {
+        const script = document.createElement("script");
+        script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
+        script.addEventListener("load", function () {
+          wxoLoader.init();
+        });
+        document.head.appendChild(script);
+      }, 0);
+    </script>
 </body>
 </html>
